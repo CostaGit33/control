@@ -42,17 +42,29 @@ async function loadPlayers() {
     apiRequest(ENDPOINTS.goleiros)
   ]);
 
-  [...jogadores, ...goleiros].forEach(j => {
-    const isGoleiro = j.defesa > 0;
-
+  jogadores.forEach(j => {
     const li = document.createElement("li");
     li.innerHTML = `
       <strong>${j.nome}</strong>
       <span>${j.pontos ?? 0} pts</span>
-      <small>${isGoleiro ? "🧤 Goleiro" : "⚽ Jogador"}</small>
+      <small>⚽ Jogador</small>
       <div class="actions">
-        <button onclick="editPlayer('${j.id}', '${isGoleiro ? "goleiros" : "jogadores"}')">✏️</button>
-        <button onclick="deletePlayer('${j.id}', '${isGoleiro ? "goleiros" : "jogadores"}')">🗑️</button>
+        <button onclick="editPlayer('${j.id}', 'jogadores')">✏️</button>
+        <button onclick="deletePlayer('${j.id}', 'jogadores')">🗑️</button>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+
+  goleiros.forEach(j => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${j.nome}</strong>
+      <span>${j.pontos ?? 0} pts</span>
+      <small>🧤 Goleiro</small>
+      <div class="actions">
+        <button onclick="editPlayer('${j.id}', 'goleiros')">✏️</button>
+        <button onclick="deletePlayer('${j.id}', 'goleiros')">🗑️</button>
       </div>
     `;
     list.appendChild(li);
