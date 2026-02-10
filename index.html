@@ -1,91 +1,109 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> Sem Dominio | Adicionar Jogador</title>
-  <link rel="stylesheet" href="common-nav.css">
-  <link rel="stylesheet" href="adicionar.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sem Domínio | Gerenciar Jogadores</title>
+
+  <link rel="stylesheet" href="common-nav.css" />
+  <link rel="stylesheet" href="adicionar.css" />
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="brand">
+<header class="app-header">
+  <div class="brand">
+    <a href="https://www.semdominio.online" target="_blank" rel="noopener" class="brand-link">
       <h1>Sem Domínio</h1>
-    </div>
-    <button class="menu-toggle" aria-label="Abrir menu">☰</button>
-    <nav class="app-nav">
-      <ul>
-        <li>
-          <a
-              href="https://www.semdominio.online"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="cta-site"
-            >
-              🌐 Visitar Sem Domínio
-            </a>
-        </li>
+    </a>
+  </div>
 
-        <li><a href="adicionar.html">Adicionar Jogador</a></li>
-      </ul>
-    </nav>
-  </header>
+  <nav class="app-nav">
+    <ul>
+      <li><a href="https://www.semdominio.online">Classificação</a></li>
+    </ul>
+  </nav>
+</header>
 
-  <main class="app-main">
-    <section class="form-section">
-      <header class="section-header">
-        <h2> Novo Jogador</h2>
-      </header>
+<main class="app-main">
 
-      <form id="playerForm" class="player-form">
-        <div class="form-group">
-          <label for="foto">Foto (URL ou nome do arquivo)</label>
-          <input type="text" id="foto" name="foto" placeholder="ex: joao.png ou https://...">
-        </div>
+  <!-- FORMULÁRIO -->
+  <section class="form-section">
+    <header class="section-header">
+      <h2 id="formTitle">➕ Novo Registro</h2>
+    </header>
 
-        <div class="form-group">
-          <label for="nome">Nome do Jogador *</label>
-          <input type="text" id="nome" name="nome" placeholder="Nome completo" required>
-        </div>
+    <form id="playerForm" class="player-form">
+      <input type="hidden" id="playerId" />
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="gols">Gols</label>
-            <input type="number" id="gols" name="gols" min="0" value="0">
-          </div>
-          <div class="form-group">
-            <label for="vitorias">Vitórias</label>
-            <input type="number" id="vitorias" name="vitorias" min="0" value="0">
-          </div>
-          <div class="form-group">
-            <label for="empate">Empates</label>
-            <input type="number" id="empate" name="empate" min="0" value="0">
-          </div>
-          <div class="form-group">
-            <label for="defesa">Defesas</label>
-            <input type="number" id="defesa" name="defesa" min="0" value="0">
-          </div>
-          <div class="form-group">
-            <label for="infracoes">Infrações (−2 pts cada)</label>
-            <input type="number" id="infracoes" name="infracoes" min="0" value="0">
-          </div>
-        </div>
+      <!-- TIPO -->
+      <div class="form-group">
+        <label for="tipo">Tipo *</label>
+        <select id="tipo" required>
+          <option value="jogadores">Jogador</option>
+          <option value="goleiros">Goleiro</option>
+        </select>
+      </div>
 
-        <div class="form-actions">
-          <button type="submit">Salvar Jogador</button>
-          <button type="reset" class="secondary">Limpar</button>
-        </div>
-      </form>
-    </section>
-  </main>
+      <!-- NOME -->
+      <div class="form-group">
+        <label for="nome">Nome *</label>
+        <input
+          type="text"
+          id="nome"
+          placeholder="Digite o nome"
+          required
+        />
+      </div>
 
-  <footer class="app-footer"></footer>
+      <!-- FOTO -->
+      <div class="form-group">
+        <label for="foto">Foto</label>
+        <input
+          type="text"
+          id="foto"
+          placeholder="URL da foto"
+        />
+      </div>
 
-  <div id="feedback" aria-live="polite"></div>
+      <!-- ESTATÍSTICAS -->
+      <div class="form-grid">
+        <input type="number" id="gols" placeholder="Gols" min="0" />
+        <input type="number" id="vitorias" placeholder="Vitórias" min="0" />
+        <input type="number" id="empate" placeholder="Empates" min="0" />
+        <input type="number" id="defesa" placeholder="Defesas" min="0" />
+        <input type="number" id="infracoes" placeholder="Infrações" min="0" />
+      </div>
 
-  <script type="module" src="./globais.js"></script>
-  <script type="module" src="./adicionar.js"></script>
+      <!-- AÇÕES -->
+      <div class="form-actions">
+        <button type="submit" id="submitBtn">Salvar</button>
+        <button
+          type="button"
+          id="cancelEdit"
+          class="secondary hidden"
+        >
+          Cancelar edição
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- LISTA -->
+  <section class="list-section">
+    <header class="section-header">
+      <h2>📋 Registros Cadastrados</h2>
+    </header>
+
+    <ul id="playerList" class="player-list"></ul>
+  </section>
+
+</main>
+
+<!-- FEEDBACK -->
+<div id="feedback" aria-live="polite"></div>
+
+<script type="module" src="./globais.js"></script>
+<script type="module" src="./adicionar.js"></script>
 
 </body>
 </html>

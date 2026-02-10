@@ -1,74 +1,163 @@
-import { apiRequest, showFeedback } from "../globais.js";
+import { apiRequest, showFeedback } from "./globais.js";
 
 /* ======================================================
-   CONFIGURAÇÃO
+   ENDPOINTS
 ====================================================== */
+const ENDPOINTS = {
+  jogadores: "/jogadores",
+  goleiros: "/goleiros"
+};
 
-const JOGADORES_ENDPOINT = "/jogadores";
+/* ======================================================
+   ELEMENTOS
+====================================================== */
 const form = document.getElementById("playerForm");
+const list = document.getElementById("playerList");
+const submitBtn = document.getElementById("submitBtn");
+const cancelBtn = document.getElementById("cancelEdit");
+const formTitle = document.getElementById("formTitle");
+const idField = document.getElementById("playerId");
+const tipoField = document.getElementById("tipo");
+const nome = document.getElementById("nome");
+const foto = document.getElementById("foto");
+const gols = document.getElementById("gols");
+const vitorias = document.getElementById("vitorias");
+const empate = document.getElementById("empate");
+const defesa = document.getElementById("defesa");
+const infracoes = document.getElementById("infracoes");
 
 /* ======================================================
-   SUBMIT DO FORMULÁRIO
+   INIT
 ====================================================== */
+loadPlayers();
 
-if (form) {
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
+/* ======================================================
+   LISTAR JOGADORES + GOLEIROS
+====================================================== */
+async function loadPlayers() {
+  list.innerHTML = "";
 
-    const payload = buildPayload();
+  const [jogadores, goleiros] = await Promise.all([
+    apiRequest(ENDPOINTS.jogadores),
+    apiRequest(ENDPOINTS.goleiros)
+  ]);
 
-    if (!validatePayload(payload)) return;
+  [...jogadores, ...goleiros].forEach(j => {
+    const isGoleiro = j.defesa > 0;
 
-    try {
-      await apiRequest(JOGADORES_ENDPOINT, {
-        method: "POST",
-        body: payload
-      });
-      
-      showFeedback("Jogador cadastrado com sucesso!", "success");
-      form.reset();
-    } catch (error) {
-      console.error("Erro ao cadastrar jogador:", error);
-      showFeedback(error.message || "Erro ao cadastrar jogador.", "error");
-    }
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${j.nome}</strong>
+      <span>${j.pontos ?? 0} pts</span>
+      <small>${isGoleiro ? "🧤 Goleiro" : "⚽ Jogador"}</small>
+      <div class="actions">
+        <button onclick="editPlayer('${j.id}', '${isGoleiro ? "goleiros" : "jogadores"}')">✏️</button>
+        <button onclick="deletePlayer('${j.id}', '${isGoleiro ? "goleiros" : "jogadores"}')">🗑️</button>
+      </div>
+    `;
+    list.appendChild(li);
   });
 }
 
 /* ======================================================
-   CONSTRUÇÃO DO PAYLOAD
+   SUBMIT (CRIAR / EDITAR)
 ====================================================== */
+form.addEventListener("submit", async e => {
+  e.preventDefault();
 
-function buildPayload() {
-  return {
-    nome: form.nome.value.trim(),
-    foto: form.foto.value.trim() || null,
-    gols: Number(form.gols.value) || 0,
-    vitorias: Number(form.vitorias.value) || 0,
-    empate: Number(form.empate.value) || 0,
-    defesa: Number(form.defesa.value) || 0,
-    infracoes: Number(form.infracoes.value) || 0
-  };
+  const payload = buildPayload();
+  const endpoint = ENDPOINTS[tipoField.value];
+  const id = idField.value;
+
+  try {
+    if (id) {
+      await apiRequest(`${endpoint}/${id}`, {
+        method: "PUT",
+        body: payload
+      });
+      showFeedback("Registro atualizado!", "success");
+    } else {
+      await apiRequest(endpoint, {
+        method: "POST",
+        body: payload
+      });
+      showFeedback("Registro cadastrado!", "success");
+    }
+
+    resetForm();
+    loadPlayers();
+  } catch (err) {
+    console.error(err);
+    showFeedback("Erro ao salvar", "error");
+  }
+});
+
+/* ======================================================
+   EDITAR
+====================================================== */
+window.editPlayer = async (id, tipo) => {
+  const endpoint = ENDPOINTS[tipo];
+  const j = await apiRequest(`${endpoint}/${id}`);
+
+  idField.value = j.id;
+  tipoField.value = tipo;
+  nome.value = j.nome;
+  foto.value = j.foto || "";
+  gols.value = j.gols;
+  vitorias.value = j.vitorias;
+  empate.value = j.empate;
+  defesa.value = j.defesa;
+  infracoes.value = j.infracoes;
+
+  submitBtn.textContent = "Atualizar";
+  cancelBtn.classList.remove("hidden");
+  formTitle.textContent = "✏️ Editar Registro";
+};
+
+/* ======================================================
+   EXCLUIR
+====================================================== */
+window.deletePlayer = async (id, tipo) => {
+  if (!confirm("Excluir registro?")) return;
+
+  await apiRequest(`${ENDPOINTS[tipo]}/${id}`, {
+    method: "DELETE"
+  });
+
+  showFeedback("Removido com sucesso", "success");
+  loadPlayers();
+};
+
+/* ======================================================
+   RESET
+====================================================== */
+cancelBtn.addEventListener("click", resetForm);
+
+function resetForm() {
+  form.reset();
+  idField.value = "";
+  tipoField.value = "jogadores";
+  submitBtn.textContent = "Salvar";
+  cancelBtn.classList.add("hidden");
+  formTitle.textContent = "➕ Novo Registro";
 }
 
 /* ======================================================
-   VALIDAÇÕES
+   PAYLOAD
 ====================================================== */
-
-function validatePayload(data) {
-  if (!data.nome) {
-    showFeedback("Nome do jogador é obrigatório.", "error");
-    return false;
-  }
-
-  const numericFields = ["gols", "vitorias", "empate", "defesa", "infracoes"];
-  for (const field of numericFields) {
-    if (data[field] < 0) {
-      showFeedback(`O campo "${field}" não pode ser negativo.`, "error");
-      return false;
-    }
-  }
-
-  return true;
+function buildPayload() {
+  return {
+    nome: nome.value.trim(),
+    foto: foto.value || null,
+    gols: +gols.value || 0,
+    vitorias: +vitorias.value || 0,
+    empate: +empate.value || 0,
+    defesa: +defesa.value || 0,
+    infracoes: +infracoes.value || 0
+  };
 }
 
-console.info("%cFutPontos | Cadastro ativo", "color:#D62828;font-weight:bold;font-size:13px");
+console.info(
+  "%cFutPontos | Gerenciamento com Tipo (Jogador / Goleiro)",
+  "color:#D62828;font-weight:bold"
+);

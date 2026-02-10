@@ -8,12 +8,17 @@ export const API_BASE_URL = "https://api.semdominio.online";
  * Cliente padrão para comunicação com a API
  */
 export async function apiRequest(endpoint, options = {}) {
+  const normalizedEndpoint = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
+
   const config = {
     method: options.method || "GET",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
+      "Accept": "application/json",
+      ...(options.headers || {})
+    }
   };
 
   if (options.body) {
@@ -21,10 +26,14 @@ export async function apiRequest(endpoint, options = {}) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    
+    const response = await fetch(
+      `${API_BASE_URL}${normalizedEndpoint}`,
+      config
+    );
+
     let data;
     const contentType = response.headers.get("content-type");
+
     if (contentType && contentType.includes("application/json")) {
       data = await response.json();
     } else {
@@ -32,12 +41,14 @@ export async function apiRequest(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      throw new Error(data.error || data.message || "Erro na comunicação com a API");
+      throw new Error(
+        data.error || data.message || "Erro na comunicação com a API"
+      );
     }
 
     return data;
   } catch (error) {
-    console.error(`Erro na requisição [${endpoint}]:`, error);
+    console.error(`Erro na requisição [${normalizedEndpoint}]:`, error.message);
     throw error;
   }
 }
@@ -48,12 +59,19 @@ export async function apiRequest(endpoint, options = {}) {
 
 /**
  * Regra oficial de pontuação do FutPontos
+ * Campos SQL: vitorias, empate, defesa, gols, infracoes
  */
-export function calculatePoints(vitorias = 0, empates = 0, defesas = 0, gols = 0, infracoes = 0) {
+export function calculatePoints(
+  vitorias = 0,
+  empate = 0,
+  defesa = 0,
+  gols = 0,
+  infracoes = 0
+) {
   return (
     Number(vitorias) * 3 +
-    Number(empates) +
-    Number(defesas) +
+    Number(empate) +
+    Number(defesa) +
     Number(gols) * 2 -
     Number(infracoes) * 2
   );
@@ -65,6 +83,7 @@ export function calculatePoints(vitorias = 0, empates = 0, defesas = 0, gols = 0
 
 export function showFeedback(message, type = "success") {
   let container = document.getElementById("feedback");
+
   if (!container) {
     container = document.createElement("div");
     container.id = "feedback";
@@ -76,7 +95,9 @@ export function showFeedback(message, type = "success") {
   div.textContent = message;
 
   container.appendChild(div);
+
   setTimeout(() => {
+    div.style.transition = "opacity 0.3s ease";
     div.style.opacity = "0";
     setTimeout(() => div.remove(), 300);
   }, 3000);
@@ -90,27 +111,27 @@ function initGlobalUI() {
   // Menu Mobile
   const menuToggle = document.querySelector(".menu-toggle");
   const appNav = document.querySelector(".app-nav");
+
   if (menuToggle && appNav) {
     menuToggle.addEventListener("click", () => {
       appNav.classList.toggle("active");
     });
   }
 
-  // Link Ativo
-  const currentPage = window.location.pathname.split("/").pop() || "index.html";
+  // Link ativo na navegação
+  const currentPage =
+    window.location.pathname.split("/").pop() || "index.html";
+
   document.querySelectorAll(".app-nav a").forEach(link => {
     const href = link.getAttribute("href");
-    if (href === currentPage) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
-    }
+    link.classList.toggle("active", href === currentPage);
   });
 
-  // Footer Dinâmico
-  const footer = document.querySelector(".app-footer");
-  if (footer) {
-    footer.innerHTML = `&copy; ${new Date().getFullYear()} Baba Sem Domínio - Todos os direitos reservados.`;
+  // Footer dinâmico
+  const footerContent = document.querySelector(".footer-content span");
+  if (footerContent) {
+    footerContent.textContent =
+      `© ${new Date().getFullYear()} • Sem Domínio - Todos os direitos reservados.`;
   }
 }
 
