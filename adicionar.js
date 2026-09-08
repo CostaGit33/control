@@ -32,6 +32,11 @@ const vitorias = document.getElementById("vitorias");
 const empate = document.getElementById("empate");
 const defesa = document.getElementById("defesa");
 const infracoes = document.getElementById("infracoes");
+const monthlyTitle = document.getElementById("monthlyTitle");
+const monthlySummary = document.getElementById("monthlySummary");
+const closeMonthBtn = document.getElementById("closeMonthBtn");
+const competenciaList = document.getElementById("competenciaList");
+const historyRanking = document.getElementById("historyRanking");
 
 /* ======================================================
    INIT
@@ -39,6 +44,42 @@ const infracoes = document.getElementById("infracoes");
 
 document.addEventListener("DOMContentLoaded", () => {
   loadPlayers();
+  loadCompetencias();
+});
+
+async function loadCompetencias() {
+  try {
+    const [atual, competencias] = await Promise.all([apiRequest("/competencias/atual"), apiRequest("/competencias")]);
+    monthlyTitle.textContent = `Mês atual: ${atual.nome || atual.chave}`;
+    monthlySummary.textContent = `${atual.resumo?.jogadores || 0} jogadores • ${atual.resumo?.pontos || 0} pontos distribuídos • status: ${atual.status}`;
+    closeMonthBtn.disabled = atual.status !== "aberta";
+    competenciaList.innerHTML = competencias.map(c => `<button type="button" class="competencia-card ${c.status === "aberta" ? "active" : ""}" data-id="${c.id}"><strong>${escapeHtml(c.nome || c.chave)}</strong><span>${c.status === "aberta" ? "Aberta" : "Fechada"} · ${c.jogadores} jogadores</span></button>`).join("");
+    competenciaList.querySelectorAll(".competencia-card").forEach(card => card.addEventListener("click", () => loadHistory(card.dataset.id, card)));
+  } catch (error) {
+    monthlyTitle.textContent = "Mês atual indisponível";
+    monthlySummary.textContent = error.message || "Não foi possível carregar a competência.";
+  }
+}
+
+async function loadHistory(id, selectedCard) {
+  try {
+    competenciaList.querySelectorAll(".competencia-card").forEach(card => card.classList.remove("active"));
+    selectedCard.classList.add("active");
+    const ranking = await apiRequest(`/competencias/${id}/jogadores`);
+    historyRanking.classList.remove("hidden");
+    historyRanking.innerHTML = `<table><thead><tr><th>#</th><th>Jogador</th><th>Pontos</th><th>Gols</th><th>Defesas</th><th>Vitórias</th></tr></thead><tbody>${ranking.map((j, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(j.nome)}</td><td>${j.pontos || 0}</td><td>${j.gols || 0}</td><td>${j.defesa || 0}</td><td>${j.vitorias || 0}</td></tr>`).join("")}</tbody></table>`;
+  } catch (error) { showFeedback(error.message || "Erro ao carregar histórico", "error"); }
+}
+
+closeMonthBtn?.addEventListener("click", async () => {
+  const confirmed = confirm("Fechar o mês atual? O ranking será preservado e uma nova competência será criada com os indicadores zerados.");
+  if (!confirmed) return;
+  closeMonthBtn.disabled = true;
+  try {
+    await apiRequest("/competencias/fechar", { method: "POST", body: { confirm: true } });
+    showFeedback("Mês fechado e nova competência criada.", "success");
+    await Promise.all([loadCompetencias(), loadPlayers()]);
+  } catch (error) { closeMonthBtn.disabled = false; showFeedback(error.message || "Erro ao fechar mês", "error"); }
 });
 
 /* ======================================================

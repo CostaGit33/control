@@ -21,6 +21,9 @@ img {
   gap: 3rem;
 }
 
+.monthly-control{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;padding:1.25rem 1.5rem;border:1px solid #d6282866;border-radius:16px;background:linear-gradient(135deg,#241719,#111);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.monthly-kicker{margin:0 0 .3rem;color:var(--highlight-color);font-size:.72rem;font-weight:800;letter-spacing:.12em}.monthly-control h2{margin:0;color:#fff}.monthly-control p{margin:.3rem 0 0;color:#b9b9b9}.close-month-btn{flex:0 0 auto;background:#d62828;color:#fff}.history-section{padding:1.25rem;border-radius:16px;background:#111;box-shadow:0 10px 30px rgba(0,0,0,.35)}.history-section .section-header h2{margin-bottom:1rem}.competencia-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem}.competencia-card{padding:1rem;border:1px solid #333;border-radius:10px;background:#1c1c1c;color:#fff;text-align:left;cursor:pointer}.competencia-card:hover,.competencia-card.active{border-color:var(--primary-color);background:#2a1717}.competencia-card strong,.competencia-card span{display:block}.competencia-card span{margin-top:.3rem;color:#aaa;font-size:.8rem}.history-ranking{margin-top:1rem;overflow:auto}.history-ranking table{width:100%;border-collapse:collapse}.history-ranking th,.history-ranking td{padding:.65rem;border-bottom:1px solid #333;text-align:left}.history-ranking th{color:var(--highlight-color);font-size:.8rem}.hidden{display:none!important}
+
 /* ======================================================
    HEADER DE SEÇÃO
 ====================================================== */
@@ -199,6 +202,7 @@ button:active {
 ====================================================== */
 
 @media (max-width: 600px) {
+  .monthly-control{align-items:stretch;flex-direction:column}.close-month-btn{width:100%}
   .player-list li {
     grid-template-columns: 1fr 60px 90px;
     font-size: 0.9rem;

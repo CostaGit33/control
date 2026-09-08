@@ -26,6 +26,21 @@
 
 <main class="app-main">
 
+  <section class="monthly-control" aria-labelledby="monthlyTitle">
+    <div>
+      <p class="monthly-kicker">CONTROLE DE COMPETÊNCIA</p>
+      <h2 id="monthlyTitle">Mês atual: carregando...</h2>
+      <p id="monthlySummary">Consultando os dados da competência aberta.</p>
+    </div>
+    <button type="button" id="closeMonthBtn" class="close-month-btn">Fechar mês</button>
+  </section>
+
+  <section class="history-section">
+    <header class="section-header"><h2>📅 Meses anteriores</h2></header>
+    <div id="competenciaList" class="competencia-list"><p class="loading">Carregando histórico...</p></div>
+    <div id="historyRanking" class="history-ranking hidden"></div>
+  </section>
+
   <!-- FORMULÁRIO -->
   <section class="form-section">
     <header class="section-header">
