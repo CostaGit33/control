@@ -461,7 +461,8 @@ function buildPayload() {
 
     nome: nome.value.trim(),
 
-    foto: foto.value.trim() || null,
+    // Campo vazio durante a edição não deve apagar a foto já cadastrada.
+    foto: foto.value.trim() || undefined,
 
     gols: Number(gols.value) || 0,
 
